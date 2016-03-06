@@ -7,14 +7,12 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 var mysql = require("mysql");
 
-// First you need to create a connection to the db
 var con = mysql.createConnection({
   host: "localhost",
   user: "root",
   password: "admin",
   database: "filmdash"
 });
-
 con.connect(function(err){
   if(err){
     console.log('Error connecting to Db');
@@ -23,19 +21,39 @@ con.connect(function(err){
   console.log('Connection established');
 });
 
-con.end(function(err) {
+
+app.get("/getWatchVideo", function(req, res) {
+  var query = con.query('SELECT FROM video WHERE video.status = 1', data, function(err, result) {
+    res.send(result);
+  });
+});
+
+app.get("/getUnwatchVideo", function(req, res) {
+  var query = con.query('SELECT FROM video WHERE video.status = 0', data, function(err, result) {
+    res.send(result);
+  });
 });
 
 
-app.get("/", function(req, res) {
+app.get("/addVideo", function(req, res) {
 
-  // con.query('SELECT * FROM employees',function(err,rows){
-  //   if(err) throw err;
-  //
-  //   console.log('Data received from Db:\n');
-  //   console.log(rows);
-  // });
-    res.send("Hello World");
+  // var data = JSON.parse(req.query);
+  var data  = { title: 'Hello MySQL','status':1};
+
+  var query = con.query('INSERT INTO video SET ?', data, function(err, result) {
+    res.send(result);
+  });
+});
+
+app.get("/getVideos", function(req, res) {
+  con.query('SELECT * FROM video',function(err,rows){
+    if(err) throw res.send(err);
+    res.send(rows);
+  });
+});
+
+  app.get("/", function(req, res) {
+    res.send("Filmdash API");
 });
 
 var server = app.listen(3000, function () {
